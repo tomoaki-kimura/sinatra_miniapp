@@ -11,34 +11,48 @@
 <%= @latitude %>,<%= @longitude %>
 
 <form action="/" method="post">
-  <p>場所の選択</p>
-  <select name="location" id="change-map" required>
-    <% @places.each do |place| %>
-      <option value="<%= place[:latitude]%>,<%= place[:longitude]%>,<%= place[:memo]%>"><%= place[:title]%></option>
-    <% end %>
-  </select>
-  <input name="title" hidden>
-  <input name="selected" hidden>
+  <p>場所の追加</p>
+  <label>場所<input type="text" name="title"></label>
+  <label>緯度<input type="text" name="latitude"></label>
+  <label>軽度<input type="text" name="longitude"></label>
+  <label>メモ<input type="text" name="memo"></label>
+  <input type="submit" value="データー追加">
 </form>
-<table border="1">
-  <tr>
-    <th>場所</th>
-    <td>緯度</td>
-    <td>軽度</td>
-    <td>メモ</td>
-  </tr>
-  <% @places.each do |place| %>
+<form action="/delete" method="post">
+  <input type="submit" value="データークリア">
+</form>
+
+<% if @places.any? %>
+  <p>マイリスト</p>
+  <table border="1">
+    <thead>
     <tr>
-      <th><%= place[:title]%></th>
-      <td><%= place[:latitude]%></td>
-      <td><%= place[:longitude]%></td>
-      <td><%= place[:memo]%></td>
+      <th>場所</th>
+      <td>緯度</td>
+      <td>軽度</td>
+      <td>メモ</td>
     </tr>
-  <% end %>
-</table>
+    </thead>
+    <tbody id="map-list">
+    <% @places.each_with_index do |place, index| %>
+      <tr id="place-id-<%= index %>">
+        <th class="title"><%= place[:title]%></th>
+        <td class="latitude"><%= place[:latitude]%></td>
+        <td class="longitude"><%= place[:longitude]%></td>
+        <td class="memo"><%= place[:memo]%></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+  <form action="/" method="get" id="select-form">
+    <input type="hidden" name="index">
+  </form>
+<% end %>
+
 <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
 <script type="text/javascript" src="https://rawgit.com/jieter/Leaflet.encoded/master/Polyline.encoded.js"></script>
 <div id="map" style="width: 100%; height: 500px;"></div>
+
 <script>
   var map = L.map('map').setView([<%= @latitude %>, <%= @longitude %>], 13);
   L.tileLayer(
@@ -52,15 +66,15 @@
     .bindPopup("<h3><%= @title %></h3><div><%= @memo %></div>")
     .openPopup();
 
-  const changeMap = document.getElementById('change-map');
+  const mapList = document.getElementById('map-list');
 
-  changeMap.addEventListener('change', (e) => {
-    const form = e.target.parentNode;
-    const selectedOption = e.target.selectedIndex;
-    const selectedValue = e.target.options[selectedOption].textContent;
-    form.title.value = selectedValue;
-    form.selected.value = selectedOption;
-    e.target.parentNode.submit();
+  mapList.addEventListener('click', (e) => {
+    const targetForm = document.getElementById('select-form');
+    const targetIndex = e.target.parentNode.getAttribute('id').replace('place-id-', '');
+    console.log(targetIndex);
+    targetForm['index'].value = targetIndex;
+    console.log(targetForm['index'].value);
+    targetForm.submit();
   });
 </script>
 </body>
