@@ -8,31 +8,62 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css">
 </head>
 <body>
-  <%= @latitude %>,<%= @longitude %>
-  <form action="/" method="get">
-    <input name="q" value="<%= params[:q] %>">
-    <input type="submit" value="検索する">
-  </form>
+<%= @latitude %>,<%= @longitude %>
 
-  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>  
-  <script type="text/javascript" src="https://rawgit.com/jieter/Leaflet.encoded/master/Polyline.encoded.js"></script>
-  <div id="map" style="width: 100%; height: 500px;"></div>
+<form action="/" method="post">
+  <p>場所の選択</p>
+  <select name="location" id="change-map" required>
+    <% @places.each do |place| %>
+      <option value="<%= place[:latitude]%>,<%= place[:longitude]%>,<%= place[:memo]%>"><%= place[:title]%></option>
+    <% end %>
+  </select>
+  <input name="title" hidden>
+  <input name="selected" hidden>
+</form>
+<table border="1">
+  <tr>
+    <th>場所</th>
+    <td>緯度</td>
+    <td>軽度</td>
+    <td>メモ</td>
+  </tr>
+  <% @places.each do |place| %>
+    <tr>
+      <th><%= place[:title]%></th>
+      <td><%= place[:latitude]%></td>
+      <td><%= place[:longitude]%></td>
+      <td><%= place[:memo]%></td>
+    </tr>
+  <% end %>
+</table>
+<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+<script type="text/javascript" src="https://rawgit.com/jieter/Leaflet.encoded/master/Polyline.encoded.js"></script>
+<div id="map" style="width: 100%; height: 500px;"></div>
+<script>
+  var map = L.map('map').setView([<%= @latitude %>, <%= @longitude %>], 13);
+  L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+    }).addTo(map);
+  L.marker(
+    [<%= @latitude %>, <%= @longitude %>],
+    { title: "marker-title" }
+  ).addTo(map)
+    .bindPopup("<h3><%= @title %></h3><div><%= @memo %></div>")
+    .openPopup();
 
-  <script>
-    // 地図表示
-    var map = L.map('map').setView([<%= @latitude %>, <%= @longitude %>], 13);
-    L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-       }).addTo(map);
-    L.marker(
-      [<%= @latitude %>, <%= @longitude %>],
-      { title: "marker-title" }
-    ).addTo(map)
-      .bindPopup("<h3><%= @title %></h3>")
-      .openPopup();
-  </script>
+  const changeMap = document.getElementById('change-map');
 
+  changeMap.addEventListener('change', (e) => {
+    const form = e.target.parentNode;
+    const selectedOption = e.target.selectedIndex;
+    const selectedValue = e.target.options[selectedOption].textContent;
+    form.title.value = selectedValue;
+    form.selected.value = selectedOption;
+    e.target.parentNode.submit();
+  });
+</script>
 </body>
 </html>
+<% params = {} %>
 

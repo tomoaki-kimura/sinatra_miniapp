@@ -1,46 +1,34 @@
 require 'sinatra'
-require 'active_support/core_ext'
-require 'json'
-require 'uri'
-require 'open-uri'
-
-configure do
-  enable :sessions
-end
 
 get '/' do
-  q = URI.encode_www_form_component(params[:q] || "新宿区")
-  uri =  "https://nominatim.openstreetmap.org/search/#{q}?#{paramators}"
-  data = JSON.parse URI.open(uri).read, { symbolize_names:  true }
-  data = data.first
-  if !data.present?
-    @title = "場所が見つかりません"
-    @latitude = 0
-    @longitude = 0
-  elsif params[:q]
-    @title = params[:q]
-    @latitude = data[:lat].to_f
-    @longitude = data[:lon].to_f
-  end
+  @places = place_data
+  data = @places.first
+  @title = data[:place]
+  @latitude = data[:latitude]
+  @longitude = data[:longitude]
+  @memo = data[:memo]
   erb :index
 end
 
 post '/' do
+  @places = place_data
   location = params[:location].split(',')
-  @selected = params[:selected]
   @title = params[:title]
-  @latitude = location[0].to_f
-  @longitude = location[1].to_f
+  @latitude = location[0]
+  @longitude = location[1]
+  @memo = location[2]
   erb :index
 end
 
 private
 
-def paramators
-  { format: "json",
-    polygon: 0,
-    addressdatails: 1
-  }.to_query
+def place_data
+  [
+    { title: "新宿区", latitude: "35.68944", longitude: "139.69167", memo: "東京の県庁所在地です" },
+    { title: "札幌市", latitude: "40.82444", longitude: "140.74", memo: "雪まつりの会場です" },
+    { title: "大阪市", latitude: "34.68639", longitude: "135.52", memo: "たこやき食べたい" },
+    { title: "福岡市", latitude: "33.60639", longitude: "130.41806", memo: "博多どんたくがあります" }
+  ]
 end
 
 
