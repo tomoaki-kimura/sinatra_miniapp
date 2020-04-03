@@ -9,7 +9,8 @@ configure do
 end
 
 get '/' do
-  q = URI.encode_www_form_component(params[:q] || "新宿区")
+  first_place = "新宿区"
+  q = URI.encode_www_form_component(params[:q] || first_place)
   uri =  "https://nominatim.openstreetmap.org/search/#{q}?#{paramators}"
   data = JSON.parse URI.open(uri).read, { symbolize_names:  true }
   data = data.first
@@ -17,8 +18,8 @@ get '/' do
     @title = "場所が見つかりません"
     @latitude = 0
     @longitude = 0
-  elsif params[:q]
-    @title = params[:q]
+  else
+    @title = params[:q] || first_place
     @latitude = data[:lat].to_f
     @longitude = data[:lon].to_f
   end
