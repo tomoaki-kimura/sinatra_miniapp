@@ -14,7 +14,7 @@
   <p>場所の選択</p>
   <select name="location" id="change-map" required>
     <% @places.each do |place| %>
-      <option value="<%= place[:latitude]%>,<%= place[:longitude]%>,<%= place[:memo]%>"><%= place[:title]%></option>
+      <option value="<%= place[:latitude]%>,<%= place[:longitude]%>,<%= place[:memo]%>"><%= place[:title] %></option>
     <% end %>
   </select>
   <input name="title" hidden>
